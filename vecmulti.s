@@ -65,10 +65,7 @@ ladd2:
 	bne $t1 $0 ladd2
 ladd2_end:
 
-  addi $t3 $t3 1
-  mul $t7 $t3 4
-  la $t5 array2
-  add $t5 $t5 $t7
+  addi $t5 $t5 -44 
 	addi $t6 $t6 4
 	addi $t0 $t0 -1
 	bne $t0 $0 ladd1
