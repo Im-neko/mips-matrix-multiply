@@ -16,8 +16,8 @@ m6:	.asciiz "Expect two address error exceptions:\n"
 	.globl array2
 	.globl array3
 array1:	.float 1.0, 0.0, 3.14, 2.72, 2.72, 1.0, 0.0, 3.14, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 3.0, 4.0
-array2:	.float 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0
-# array2:	.float 1.0, 1.0, 0.0, 3.14, 0.0, 1.0, 3.14, 2.72, 0.0, 1.0, 1.0, 0.0, 4.0, 3.0, 2.0, 1.0
+#array2:	.float 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0
+array2:	.float 1.0, 1.0, 0.0, 3.14, 0.0, 1.0, 3.14, 2.72, 0.0, 1.0, 1.0, 0.0, 4.0, 3.0, 2.0, 1.0
 array3:	.float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 	.text
@@ -34,20 +34,19 @@ lbd1_:	.word 0x76543210, 0xfedcba98
 	la $a0 lb_
 	syscall
 
-# array3[0][n]だけ計算するのを書く
+# array3[n][n]計算するのを書く
 # main program: add array1 & array2, store in array3
 # first, the setup
 	li $t0 4	# loop counter ladd1
 	li $t1 4	# loop counter ladd2
 	li $t2 16	# next row index of matrixA
-	li $t3 1	# step
-	la $t4 array1
+  li $t3 0
 	la $t5 array2
 	la $t6 array3
-	li $t7 0	# tmp data
 
 ladd1:
 	li $t1 4	# init loop counter ladd2
+	la $t4 array1
 
 ladd2:	
 	lwc1 $f0 0($t4)
@@ -56,16 +55,18 @@ ladd2:
 
 	mul.s $f2 $f1 $f0
   add.s $f3 $f3 $f2
-	swc1 $f3 0($t6) # store $f2 data to $t1
+	swc1 $f3 0($t6) # store $f3 data to $t6
 
 	addi $t4 $t4 4
-	add $t5 $t5 $t2
+	addi $t5 $t5 16
 
 	addi $t1 $t1 -1
 	bne $t1 $0 ladd2
 ladd2_end:
 
-  addi $t5 $t5 -44 
+  addi $t3 $t3 4
+  la $t5 array2
+  add $t5 $t5 $t3
 	addi $t6 $t6 4
 	addi $t0 $t0 -1
 	bne $t0 $0 ladd1
