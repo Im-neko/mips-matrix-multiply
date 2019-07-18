@@ -15,16 +15,10 @@ m6:	.asciiz "Expect two address error exceptions:\n"
 	.globl array1
 	.globl array2
 	.globl array3
-  .globl array1n
-  .globl array1m
-  .globl array2m
-array1:	.float 1.0, 0.0, 3.14, 2.72, 2.72, 1.0, 0.0, 3.14, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 3.0, 4.0
-# array1:	.float 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0
+# array1:	.float 1.0, 0.0, 3.14, 2.72, 2.72, 1.0, 0.0, 3.14, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 3.0, 4.0
+array1:	.float 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0
 array2:	.float 1.0, 1.0, 0.0, 3.14, 0.0, 1.0, 3.14, 2.72, 0.0, 1.0, 1.0, 0.0, 4.0, 3.0, 2.0, 1.0
 array3:	.float 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-array1n: .word 4
-array1m: .word 4
-array2m: .word 4
 
 	.text
 	.globl main
@@ -43,27 +37,39 @@ lbd1_:	.word 0x76543210, 0xfedcba98
 # まずはarray3[0][0]だけ計算するのを書く
 # main program: add array1 & array2, store in array3
 # first, the setup
-	addi $t0 4	# loop counter
-	addi $t1 0	# tmp data
-	addi $t2 0	# next row index of matrixA
-	addi $t3 4	# data size
+	li $t0 4	# loop counter ladd1
+	li $t1 4	# loop counter ladd2
+	li $t2 0	# next row index of matrixA
+	li $t3 4	# data size
 	la $t4 array1
 	la $t5 array2
 	la $t6 array3
-ladd2:
 
-ladd1:	
+ladd1:
+	li $t1 4	# init loop counter ladd2
+
+ladd2:	
 	lwc1 $f0 0($t4)
 	lwc1 $f1 0($t5)
 	lwc1 $f3 0($t6)
+
 	mul.s $f2 $f1 $f0
   add.s $f3 $f3 $f2
-	swc1 $f3 0($t6) # store $f2 data to $t1
-	addi $t0 $t0 -1
+
   mul $t2 $t3 4 
 	addi $t4 $t4 4
 	add $t5 $t5 $t2
+
+	addi $t1 $t1 -1
+	bne $t1 $0 ladd2
+ladd2_end:
+
+	swc1 $f3 0($t6) # store $f2 data to $t1
+	addi $t6 $t6 4
+	addi $t0 $t0 -1
 	bne $t0 $0 ladd1
+ladd1_end:
+
 
 # Done adding...
 	.data
